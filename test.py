@@ -8,7 +8,7 @@ import django_zonecache as zonecache
 
 class ZoneCacheTest(TestCase):
 
-    def test_non_groups(self):
+    def test_non_zones(self):
         res = zonecache.add('my_key', 'my_value')
         self.assertTrue(res)
         cached_value = zonecache.get('my_key')
@@ -23,29 +23,29 @@ class ZoneCacheTest(TestCase):
         cached_value = zonecache.get('my_key')
         self.assertEqual(cached_value, 'my_value')
 
-    def test_groups(self):
-        zonecache.add('my_key', 'my_value', group='my_group')
-        cached_value = zonecache.get('my_key', group='my_group')
+    def test_zones(self):
+        zonecache.add('my_key', 'my_value', zone='my_zone')
+        cached_value = zonecache.get('my_key', zone='my_zone')
         self.assertEqual(cached_value, 'my_value')
 
-        zonecache.invalidate_group('my_group')
-        cached_value = zonecache.get('my_key', group='my_group')
+        zonecache.invalidate_zone('my_zone')
+        cached_value = zonecache.get('my_key', zone='my_zone')
         self.assertEqual(cached_value, None)
 
-        zonecache.add('my_key', 'my_value', group='my_group')
-        cached_value = zonecache.get('my_key', group='my_group')
+        zonecache.add('my_key', 'my_value', zone='my_zone')
+        cached_value = zonecache.get('my_key', zone='my_zone')
         self.assertEqual(cached_value, 'my_value')
 
-    def test_groups_version(self):
-        zonecache.invalidate_group('my_group')
+    def test_zone_version(self):
+        zonecache.invalidate_zone('my_zone')
 
-        zonecache.add('my_key', 'my_value', version=2, group='my_group')
-        zonecache.add('my_key', 'my_value_2', version=3, group='my_group')
+        zonecache.add('my_key', 'my_value', version=2, zone='my_zone')
+        zonecache.add('my_key', 'my_value_2', version=3, zone='my_zone')
 
-        cached_value = zonecache.get('my_key', version=2, group='my_group')
+        cached_value = zonecache.get('my_key', version=2, zone='my_zone')
         self.assertEqual(cached_value, 'my_value')
 
-        cached_value = zonecache.get('my_key', version=3, group='my_group')
+        cached_value = zonecache.get('my_key', version=3, zone='my_zone')
         self.assertEqual(cached_value, 'my_value_2')
 
 

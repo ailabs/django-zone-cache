@@ -1,6 +1,6 @@
 """A thin layer for the django cache interface to specify cache zones.
 
-Django cache does not offer the functionality to purge a group ('zone') of
+Django cache does not offer the functionality to purge a zone ('group') of
 cached objects. This module prefixes all keys for the items within one zone
 with a zone key. If the zone should be invalidated then the zone key
 is incremented.
@@ -8,36 +8,33 @@ is incremented.
 All actions take two cache lookups, one for the zone key and one for the
 actual value.
 
-
-TODO: all references of `group` should be renamed to `zone`.
-
 """
 from django.core.cache import cache
 
 
-def add(key, value, timeout=None, version=None, group=None):
-    key, version = make_group_key(key, version, group)
+def add(key, value, timeout=None, version=None, zone=None):
+    key, version = make_zone_key(key, version, zone)
     return cache.add(key, value, timeout, version=version)
 
 
-def get(key, default=None, version=None, group=None):
-    key, version = make_group_key(key, version, group)
+def get(key, default=None, version=None, zone=None):
+    key, version = make_zone_key(key, version, zone)
     return cache.get(key, default, version)
 
 
-def set(key, value, timeout=None, version=None, group=None, refreshed=False):
-    key, version = make_group_key(key, version, group)
+def set(key, value, timeout=None, version=None, zone=None, refreshed=False):
+    key, version = make_zone_key(key, version, zone)
     return cache.set(key, value, timeout, version)
 
 
-def delete(key, version=None, group=None):
-    key, version = make_group_key(key, version, group)
+def delete(key, version=None, zone=None):
+    key, version = make_zone_key(key, version, zone)
     return cache.delete(key, version)
 
 
-def invalidate_group(group):
-    """ Invalidates all cache keys belonging to group """
-    key, version = _group_metadata(group)
+def invalidate_zone(zone):
+    """ Invalidates all cache keys belonging to zone """
+    key, version = _zone_metadata(zone)
     try:
         cache.incr(key)
     except ValueError:
@@ -45,23 +42,23 @@ def invalidate_group(group):
         cache.incr(key)
 
 
-def make_group_key(key, version=None, group=None):
+def make_zone_key(key, version=None, zone=None):
     """Create the unique zone key"""
-    if group:
-        group_key, group_version = _group_metadata(group, version)
+    if zone:
+        zone_key, zone_version = _zone_metadata(zone, version)
         if version:
             key = '%d:%s' % (version, key)
-        key = '%s:%s' % (group, key)
-        return key, group_version
+        key = '%s:%s' % (zone, key)
+        return key, zone_version
     return key, version
 
 
-def _group_metadata(group, version=None):
+def _zone_metadata(zone, version=None):
     """ This can be useful sometimes if you're doing a very large number
         of operations and you want to avoid all of the extra cache hits.
     """
-    group_key = '_:group_version::%s' % group
+    zone_key = '_:zone_version::%s' % zone
     if version:
-        group_key += ':%d' % version
-    group_version = cache.get(group_key, default=1)
-    return group_key, group_version
+        zone_key += ':%d' % version
+    zone_version = cache.get(zone_key, default=1)
+    return zone_key, zone_version

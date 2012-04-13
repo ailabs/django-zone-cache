@@ -15,7 +15,7 @@ with open('README.rst', 'r') as fh:
 
 setup(
     name='django-zone-cache',
-    version='0.1',
+    version='0.2',
     url='https://github.com/ailabs/django-zone-cache/',
     license='MIT',
     author='Michael van Tellingen',
